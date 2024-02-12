@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -114,7 +115,7 @@ namespace WatchStore.Service
             {
                 if (_repository.Get(Id) != null)
                 {
-                    Product p = new Product();
+                    Product p = _repository.Get(Id);
                     p.Id = Id;
                     p.ProductName = dto.ProductName;
                     p.ProductPrice = dto.ProductPrice;
@@ -128,6 +129,40 @@ namespace WatchStore.Service
             }
             return false;
             
+        }
+
+        public bool updateQuantity(Guid productId, Guid userId, int quantity)
+        {
+            var user = this._userRepository.GetById(userId);
+            if (user != null)
+            {
+                var userShoppingCard = user.UserCart;
+                if (productId != Guid.Empty && userShoppingCard != null)
+                {
+                    var product = this.getProductDetails(productId);
+                    if (product != null)
+                    {
+                        var existing = userShoppingCard.ProductInShoppingCarts.Where(
+                            z => z.ShoppingCartId == userShoppingCard.Id
+                            && z.ProductId == productId).FirstOrDefault();
+
+                        if (existing != null)
+                        {
+                            existing.Quantity = quantity;
+                            this._productInShoppingCartRepository.Update(existing);
+                            return true;
+
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                        
+                    }
+                    return false;
+                }
+            }
+            return false;
         }
     }
 }

@@ -47,6 +47,27 @@ namespace WatchStoreApi.Controllers
 
         }
 
+        [HttpDelete("deleteFromShoppingCart")]
+        public IActionResult DeleteFromShoppingCart(Guid id)
+        {
+
+            string jwt = Request.Cookies["jwt"];
+            Guid userId = _jwtService.GetUser(jwt);
+
+            var result = this._shoppingCartService.deleteProductFromSoppingCart(userId, id);
+
+            if (result)
+            {
+                return Ok();
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+
+
         [HttpGet("Order")]
         public Boolean Order()
         {

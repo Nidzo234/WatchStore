@@ -12,5 +12,6 @@ namespace WatchStore.Service.Interface
     {
         public ShoppingCartDto getShoppingCartInfo(User u);
         bool order(User u);
+        bool deleteProductFromSoppingCart(Guid userId, Guid productId);
     }
 }

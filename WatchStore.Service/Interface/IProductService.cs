@@ -15,5 +15,6 @@ namespace WatchStore.Service
         Product getProductDetails(Guid Id);
         bool updateProduct(Guid Id, ProductDto dto);
         bool addToShoppingCart(Guid Id, AddToShoppingCardDto dto);
+        bool updateQuantity(Guid productId, Guid userId,  int quantity);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using WatchStore.Domain;
+using WatchStore.Domain.Dto;
 using WatchStore.Service;
 
 namespace WatchStoreApi.Controllers
@@ -44,6 +45,37 @@ namespace WatchStoreApi.Controllers
                     Guid userId = _jwtService.GetUser(jwt);
                     var user = _userService.GetUserById(userId);
                     var result = _productService.addToShoppingCart(userId, model);
+                    if (result)
+                    {
+                        return Ok();
+                    }
+
+
+                }
+                catch (Exception)
+                {
+                    return Unauthorized();
+                }
+
+            }
+
+            return NotFound();
+        }
+
+
+
+
+
+
+        [HttpPost("updateQuantity")]
+        public IActionResult updateQuantity(updateQuantityDto dto) {
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    string jwt = Request.Cookies["jwt"];
+                    Guid userId = _jwtService.GetUser(jwt);
+                    var result = _productService.updateQuantity(dto.productId,userId, dto.quantity);
                     if (result)
                     {
                         return Ok();

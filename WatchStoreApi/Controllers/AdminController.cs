@@ -10,14 +10,13 @@ namespace WatchStoreApi.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IProductService _productService;
-
         public AdminController(IProductService productService)
         {
             _productService = productService;
         }
 
         [HttpPost("addProduct")]
-        public void addNewProduct(ProductDto dto)
+        public IActionResult addNewProduct(ProductDto dto)
         {
             if (ModelState.IsValid)
             {
@@ -27,8 +26,20 @@ namespace WatchStoreApi.Controllers
                 p.ProductPrice = dto.ProductPrice;
                 p.ProductDescription = dto.ProductDescription;
                 p.ProductRating = dto.ProductRating;
-                this._productService.CreateProduct(p);
+
+                var createdProduct = this._productService.CreateProduct(p);
+
+                if (createdProduct == true)
+                {
+                  
+                    return Ok(createdProduct);
+                }
+                else
+                {
+                    return BadRequest("Failed to create product");
+                }
             }
+            return BadRequest("Invalid product data");
         }
 
 
@@ -65,9 +76,15 @@ namespace WatchStoreApi.Controllers
         {
             if (ModelState.IsValid)
             {
-                _productService.updateProduct(id, product);
-                return Ok();
+                if (_productService.getProductDetails(id) != null)
+                {
+
+                    _productService.updateProduct(id, product);
+                    return Ok();
+                
             }
+        }
+            
             return NotFound("The product is not edited");
         }
 

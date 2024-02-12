@@ -32,12 +32,14 @@ public class Program
 
         builder.Services.AddTransient<IJwtService, JwtService>();
         builder.Services.AddTransient<IUserService, UserService>();
+        builder.Services.AddTransient<IOrderService, OrderService>();
         builder.Services.AddTransient<IProductService, WatchStore.Service.ProductService>();
         builder.Services.AddTransient<IShoppingCartService, ShoppingCartService>();
 
         builder.Services.Configure<StripeSettings>(Configuration.GetSection("Stripe"));
 
         builder.Services.AddScoped<IUserRepository, UserRepository>();
+        builder.Services.AddScoped<IOrderRepository, OrderRepository>();
         builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
         var app = builder.Build();
 
