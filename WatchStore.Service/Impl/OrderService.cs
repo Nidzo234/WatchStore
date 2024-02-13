@@ -28,5 +28,10 @@ namespace WatchStore.Service
             return _orderRepossitory.getAllOrdersFromUser(u.Id);
 
         }
+
+        public Order getOrderDetails(Guid id)
+        {
+            return _orderRepossitory.getOrderDetails(id);
+        }
     }
 }

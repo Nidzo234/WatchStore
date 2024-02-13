@@ -14,7 +14,7 @@ namespace WatchStore.Repository
         private readonly AppDbContext _context;
         private DbSet<Order> entities;
 
-        public OrderRepository (AppDbContext context)
+        public OrderRepository(AppDbContext context)
         {
             _context = context;
             entities = context.Set<Order>();
@@ -24,7 +24,7 @@ namespace WatchStore.Repository
             string id = userId.ToString();
             var res = entities.Where(s => s.UserId == id).
                 Include(z => z.ProductInOrders)
-               .Include("ProductInOrders.Product").ToListAsync().Result; 
+               .Include("ProductInOrders.Product").ToListAsync().Result;
             return res;
         }
 
@@ -35,6 +35,14 @@ namespace WatchStore.Repository
                .Include(z => z.ProductInOrders)
                .Include("ProductInOrders.Product")
                .ToListAsync().Result;
+        }
+
+        public Order getOrderDetails(Guid orderId)
+        {
+            var res = entities.Where(s => s.Id == orderId).
+               Include(z => z.ProductInOrders)
+              .Include("ProductInOrders.Product").FirstOrDefault();
+            return res;
         }
     }
 }

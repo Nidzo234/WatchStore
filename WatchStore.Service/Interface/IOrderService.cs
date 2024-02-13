@@ -11,6 +11,6 @@ namespace WatchStore.Service.Interface
     {
         List<Order> getAllOrdersFromUser(User u);
         List<Order> getAllOrders();
-
+        Order getOrderDetails(Guid id);
     }
 }

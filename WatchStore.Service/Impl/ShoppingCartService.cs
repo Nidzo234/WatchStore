@@ -112,7 +112,7 @@ namespace WatchStore.Service
                     UserId = u.Id.ToString(),
                 };
 
-                this._orderRepository.Insert(order);
+                
 
                 List<ProductInOrder> productInOrders = new List<ProductInOrder>();
 
@@ -127,7 +127,10 @@ namespace WatchStore.Service
                 }).ToList();
 
                 productInOrders.AddRange(result);
+                if (productInOrders.Count == 0)
+                    return false;
 
+                this._orderRepository.Insert(order);
                 foreach (var item in productInOrders)
                 {
                     this._productInOrderRepository.Insert(item);

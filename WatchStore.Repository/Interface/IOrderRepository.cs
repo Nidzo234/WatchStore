@@ -11,5 +11,6 @@ namespace WatchStore.Repository
     {
         List<Order> getAllOrdersFromUser(Guid userId);
         List<Order> getAllOrders();
+        Order getOrderDetails(Guid orderId);
     }
 }

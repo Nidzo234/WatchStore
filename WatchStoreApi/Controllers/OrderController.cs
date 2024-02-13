@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using GemBox.Document;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
 using WatchStore.Domain;
+using WatchStore.Domain.Dto;
 using WatchStore.Service;
 using WatchStore.Service.Interface;
 
@@ -19,6 +23,7 @@ namespace WatchStoreApi.Controllers
             _userService = userService;
             _jwtService = jwtService;
             _orderService = orderService;
+            ComponentInfo.SetLicense("FREE-LIMITED-KEY");
         }
 
         [HttpPost("myOrders")]
@@ -33,7 +38,36 @@ namespace WatchStoreApi.Controllers
                 var result = _orderService.getAllOrdersFromUser(user);
                 if (result != null)
                 {
-                    return Ok(result);
+                    List<OrderDto> orders = new List<OrderDto>();
+                    foreach(var order in result)
+                    {
+                        var pio = order.ProductInOrders;
+                        List<ProductInShoppingCartDto> products = new List<ProductInShoppingCartDto>();
+                        double total = 0.0;
+                        foreach(var product in pio)
+                        {
+                            total += product.Quantity * product.Product.ProductPrice;
+                            ProductInShoppingCartDto dto = new ProductInShoppingCartDto
+                            {
+                                id = product.ProductId,
+                                ProductDescription = product.Product.ProductDescription,
+                                ProductName = product.Product.ProductName,
+                                ProductPrice = product.Product.ProductPrice,
+                                ProductImage = product.Product.ProductImage,
+                                quantity = product.Quantity
+                              
+                            };
+                            products.Add(dto);
+                        }
+
+                        orders.Add(new OrderDto
+                        {
+                            Id = order.Id,
+                            products = products,
+                            totalPrice = total
+                        });
+                    }
+                    return Ok(orders);
                 }
                 return NotFound(result);
 
@@ -53,5 +87,55 @@ namespace WatchStoreApi.Controllers
             return _orderService.getAllOrders();
         }
 
+
+
+
+        [HttpGet("getInvoice")]
+        public IActionResult getInvoice(Guid id)
+        {
+            var result = _orderService.getOrderDetails(id);
+            if (result != null)
+            {
+                var templatePath = Path.Combine(Directory.GetCurrentDirectory(), "Invoice.docx");
+                var document = DocumentModel.Load(templatePath);
+                document.Content.Replace("{{OrderNumber}}", result.Id.ToString());
+                document.Content.Replace("{{CostumerEmail}}", "nikolajovanovski234@gmail.com");
+                StringBuilder sb = new StringBuilder();
+                var total = 0.0;
+
+                foreach (var item in result.ProductInOrders)
+                {
+                    total += item.Quantity * item.Product.ProductPrice;
+                    sb.AppendLine("Часовник " + item.Product.ProductName + "  количина:  " + item.Quantity + "  цена:  " + item.Product.ProductPrice+ " ден.");
+                }
+                document.Content.Replace("{{AllProducts}}", sb.ToString());
+                document.Content.Replace("{{TotalPrice}}",total.ToString() + "денари");
+
+                var stream = new MemoryStream();
+
+                document.Save(stream, new PdfSaveOptions());
+                return File(stream.ToArray(), new PdfSaveOptions().ContentType, "ExportInvoice.pdf");
+
+            }
+           
+            
+            return BadRequest();
         }
+
+
+        [HttpGet("getOrderDetails")]
+        public IActionResult getOrderDetails(Guid id)
+        {
+            var result = _orderService.getOrderDetails(id);
+            if(result != null)
+            {
+                return Ok(result);
+            }
+            return BadRequest();
+            
+        }
+    }
+
+
+    
 }
